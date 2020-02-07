@@ -75,16 +75,24 @@
         :data="history.map(h => [h.date, parseFloat(h.priceUsd).toFixed(2)])"
       />
 
+      <h3 class="text-xl my-10">Mejores Ofertas de Cambio</h3>
+
       <table>
-        <tr class="border-b">
+        <tr v-for="m in markets" :key="`${m.exchageId}-${m.priceUsd}`" class="border-b">
           <td>
-            <b></b>
+            <b>{{ m.exchangeId }}</b>
           </td>
-          <td></td>
-          <td></td>
+          <td>{{ m.priceUsd | dollar }}</td>
+          <td>{{ m.baseSymbol }} / {{ m.quoteSymbol }}</td>
           <td>
-            <ex-button />
-            <a class="hover:underline text-green-600" target="blank"></a>
+            <ex-button
+              :is-loading="m.isLoading || false"
+              v-if="!m.url"
+              @custom-click="getWebsite(m)"
+            >
+              <slot>Obtener Link</slot>
+            </ex-button>
+            <a v-else class="hover:underline text-green-600" target="blank">{{ m.url }}</a>
           </td>
         </tr>
       </table>
@@ -135,6 +143,18 @@ export default {
   },
 
   methods: {
+    getWebsite(exchange) {
+      this.$set(exchange, "isLoading", true);
+
+      return api
+        .getExchange(exchange.exchangeId)
+        .then(res => {
+          this.$set(exchange, "url", res.exchangeUrl);
+        })
+        .finallyfinally(() => {
+          this.$set(exchange, "isLoading", false);
+        });
+    },
     getCoin() {
       const id = this.$route.params.id;
       this.isLoading = true;
