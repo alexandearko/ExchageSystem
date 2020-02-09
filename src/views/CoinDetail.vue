@@ -151,7 +151,7 @@ export default {
         .then(res => {
           this.$set(exchange, "url", res.exchangeUrl);
         })
-        .finallyfinally(() => {
+        .finally(() => {
           this.$set(exchange, "isLoading", false);
         });
     },
